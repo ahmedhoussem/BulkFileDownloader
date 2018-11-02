@@ -8,7 +8,9 @@ Feel free to download it and use it how ever you want , to use it all you have t
 * Click the "Select File" button and select the text file containing the URLs separated by backspaces 
 ex : 
 http://url.to/images1.jpg 
+
 http://url.to/images2.jpg 
+
 http://url.to/images3.jpg 
 
 
