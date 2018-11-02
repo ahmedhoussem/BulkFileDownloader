@@ -22,12 +22,14 @@
 
         <Button Name="SelectFiles" Grid.Column="1" Grid.Row="0" Content="Select Files" Margin="8" Click="SelectFiles_Click"></Button>
         <Button Name="SelectFolder" Grid.Column="1" Grid.Row="1" Content="Select Folder" Margin="8" Click="SelectFolder_Click"></Button>
-        <TextBox Name="URLValue" Grid.RowSpan="2" Grid.Column="0" Grid.Row="0" Text="Paste File URL Here ...." Margin="20"></TextBox>
-    
-       
-        <ListView Name="FilesList" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="20"></ListView>
 
-        <Button Name="DownloadBtn" Grid.Column="1" Grid.Row="3" Content="Download" Margin="20" Click="DownloadBtn_Click" ></Button>
+        <TextBox Name="TextFileURL" Grid.RowSpan="1" Grid.Column="0" Grid.Row="0" Text="{Binding Path=TextFilePath }" Margin="5"></TextBox>
+        <TextBox Name="FolderURL" Grid.RowSpan="1" Grid.Column="0" Grid.Row="1" Text="{Binding Path=DownloadFolderPath }" Margin="5"></TextBox>
+
+
+        <ListView Name="FilesList" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="20" ItemsSource="{Binding Path = lines }"></ListView>
+
+        <Button Name="DownloadBtn" Grid.Column="1" Grid.Row="3" Content="Download" Margin="20" Click="DownloadBtn_Click" IsEnabled="{Binding Path = CanDownload}" ></Button>
 
         <TextBlock Name="FilesCounter" Grid.Row="4" Grid.Column="0" Text="Files Downloaded" TextAlignment="Center" VerticalAlignment="Center"/>
     </Grid>

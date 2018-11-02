@@ -16,26 +16,69 @@ using System.Web;
 using System.Net;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace ImagesDownloader
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window , INotifyPropertyChanged
     {
-
-        const string URL = @"C:\Users\Bloodthirst\Desktop\Python\DownloadedFiles\image";
-
+        #region Properties to bind for MVVM
 
         //The URLs Extracted from the file
-        List<string> lines = new List<string>();
+        private ObservableCollection<string> _lines = new ObservableCollection<string>();
 
-        string Folder = String.Empty;
+        public ObservableCollection<string> lines
+        {
+            get { return _lines; }
+            set { _lines = value; OnPropertyRaised("lines"); }
+        }
+
+        public bool CanDownload
+        {
+            get { return (String.Empty != TextFilePath && String.Empty != DownloadFolderPath); }
+        }
+
+
+        //Download folder path
+        private string _DownloadFolderPath = String.Empty;
+
+        public string DownloadFolderPath
+        {
+            get { return _DownloadFolderPath; }
+            set { _DownloadFolderPath = value; OnPropertyRaised("DownloadFolderPath"); OnPropertyRaised("CanDownload");  }
+        }
+
+
+        //Text file containing URLs
+        private string _TextFilePath = String.Empty;
+
+
+        public string TextFilePath
+        {
+            get { return _TextFilePath; }
+            set { _TextFilePath = value; OnPropertyRaised("TextFilePath"); OnPropertyRaised("CanDownload"); }
+        }
+
+
+        #endregion
+
+        #region MVVM region
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyRaised(string propertyname)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
+
+        #endregion
 
         public MainWindow()
         {
-
+            this.DataContext = this;
             InitializeComponent();
 
 
@@ -49,14 +92,15 @@ namespace ImagesDownloader
             {
                 string fileToOpen = FD.FileName;
 
-                URLValue.Text = fileToOpen;
+                if(fileToOpen != String.Empty)
+                    TextFilePath = fileToOpen;
             }
 
-            lines = System.IO.File.ReadAllLines(URLValue.Text).ToList();
+            lines.Clear();
 
-            foreach (string line in lines)
+            foreach (string line in System.IO.File.ReadAllLines(TextFilePath).ToList())
             {
-                FilesList.Items.Add(line);
+                lines.Add(line);
             }
 
 
@@ -86,7 +130,7 @@ namespace ImagesDownloader
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                Folder = dlg.FileName;
+                DownloadFolderPath = dlg.FileName;
                 // Do something with selected folder string
             }
         }
@@ -108,7 +152,7 @@ namespace ImagesDownloader
 
                     var ext = line.Value.Split('.').Last();
 
-                    var path = Folder + @"\" + line.Key + "." + ext;
+                    var path = DownloadFolderPath + @"\" + line.Key + "." + ext;
 
                     //set up the on downlaod complete event
                     client.DownloadFileCompleted += ((obj, evtArgs) =>
