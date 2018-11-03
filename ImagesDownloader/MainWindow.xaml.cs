@@ -28,6 +28,34 @@ namespace ImagesDownloader
     {
         #region Properties to bind for MVVM
 
+
+        readonly object ThreadLockMutex = new object();
+
+        private int _Counter;
+
+        public int Counter
+        {
+            get { return _Counter; }
+            set { _Counter = value; OnPropertyRaised("Counter"); OnPropertyRaised("Progress"); }
+        }
+
+        public string Progress
+        {
+            get
+            {
+                if(lines.Count == 0)
+                {
+                    return "Waiting ...";
+                }
+                if(_Counter == lines.Count)
+                {
+                    return "Completed !";
+                }
+
+                return _Counter + " / " + lines.Count ;
+            }
+        }
+
         //The URLs Extracted from the file
         private ObservableCollection<string> _lines = new ObservableCollection<string>();
 
@@ -109,14 +137,13 @@ namespace ImagesDownloader
 
         private async void DownloadBtn_Click(object sender, RoutedEventArgs e)
         {
-            await DownloadFilesAsync();
-            FilesCounter.Text = "Complete";
+            await Task.Run(DownloadFilesAsync);
         }
 
         private void SelectFolder_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new CommonOpenFileDialog();
-            dlg.Title = "My Title";
+            dlg.Title = "Select Download Folder ...";
             dlg.IsFolderPicker = true;
 
             dlg.AddToMostRecentlyUsedList = false;
@@ -176,7 +203,11 @@ namespace ImagesDownloader
                         }
 
                         //Increment file counter
-                        //FilesCounter.Text = count + @"/" + lines.Count;
+                        lock(ThreadLockMutex)
+                        {
+                            Counter++;
+                        }
+                        
                     });
 
                     try
@@ -186,7 +217,7 @@ namespace ImagesDownloader
                     }
                     catch (Exception ex)
                     {
-                        //An error occurent during the file downlaod : 404 response , access problems , etc ...
+                        //An error occured during the file downlaod : 404 response , access problems , etc ...
                     }
                 }
             });
